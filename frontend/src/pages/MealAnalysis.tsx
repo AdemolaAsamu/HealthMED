@@ -396,7 +396,7 @@ export default function MealAnalysis() {
             <h2 className="text-3xl font-bold mb-8">Glucose Response Simulation</h2>
 
             <div className="grid md:grid-cols-3 gap-6 mb-12">
-              <div className="bg-gradient-to-br from-brand-primary to-red-600 text-white p-8 rounded-xl">
+              <div className="bg-brand-dark text-white p-8 rounded-lg">
                 <p className="text-sm font-semibold mb-2">Peak Glucose</p>
                 <p className="text-4xl font-bold">
                   {lastSimulation.estimated_peak_mg_dl.toFixed(1)} mg/dL
@@ -408,7 +408,7 @@ export default function MealAnalysis() {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-brand-secondary to-teal-600 text-white p-8 rounded-xl">
+              <div className="bg-brand-secondary text-white p-8 rounded-lg">
                 <p className="text-sm font-semibold mb-2">Insulin Load Score</p>
                 <p className="text-4xl font-bold">
                   {lastSimulation.insulin_load_score.toFixed(1)}/100
@@ -420,7 +420,7 @@ export default function MealAnalysis() {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white p-8 rounded-xl">
+              <div className="bg-energy-storage text-white p-8 rounded-lg">
                 <p className="text-sm font-semibold mb-2">Storage Risk Score</p>
                 <p className="text-4xl font-bold">
                   {lastSimulation.storage_risk_score.toFixed(1)}/100

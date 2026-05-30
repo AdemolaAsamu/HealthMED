@@ -226,7 +226,6 @@ DEBUG=True
 ### Frontend (.env.local)
 ```
 VITE_API_BASE_URL=http://localhost:8000
-VITE_REQUIRE_ADMIN_KEY=true
 ```
 
 ## Database Schema

@@ -6,36 +6,41 @@
 @layer base {
   body {
     @apply bg-brand-light text-brand-dark;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+    font-family: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   h1 {
-    @apply text-4xl font-bold text-brand-dark;
+    @apply text-4xl font-bold;
+    font-family: Manrope, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   h2 {
-    @apply text-3xl font-bold text-brand-dark;
+    @apply text-3xl font-bold;
+    font-family: Manrope, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   h3 {
-    @apply text-2xl font-semibold text-brand-dark;
+    @apply text-2xl font-semibold;
+    font-family: Manrope, Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
 
   p {
-    @apply text-lg text-gray-700;
+    @apply text-base;
   }
 }
 
 /* Component styles */
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 rounded-lg font-semibold text-white bg-brand-primary hover:bg-opacity-90 transition-all duration-200 active:scale-95 shadow-lg;
+    @apply px-6 py-3 rounded-lg font-semibold text-white bg-brand-primary hover:bg-opacity-90 transition-all duration-200 active:scale-95 shadow-sm;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 rounded-lg font-semibold text-brand-primary bg-brand-primary bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 border-2 border-brand-primary;
+    @apply px-6 py-3 rounded-lg font-semibold text-brand-primary bg-white hover:bg-red-50 transition-all duration-200 border border-brand-primary;
+  }
+
+  .btn-on-dark {
+    @apply px-6 py-3 rounded-lg font-semibold text-white bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 border border-white border-opacity-70;
   }
 
   .btn-accent {
@@ -43,7 +48,7 @@
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl;
+    @apply bg-white rounded-lg border border-gray-100 shadow-sm p-6 transition-shadow duration-200;
   }
 
   .card-elevated {

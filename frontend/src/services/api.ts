@@ -10,6 +10,7 @@ import {
   EducationCard,
   EducationCardCreate,
   DisclaimerResponse,
+  AdminLoginResponse,
 } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -151,6 +152,16 @@ export const educationAPI = {
   deleteCard: async (cardId: number, adminKey?: string): Promise<any> => {
     const response = await apiClient.delete(`/api/education/cards/${cardId}`, {
       headers: getAdminHeaders(adminKey),
+    });
+    return response.data;
+  },
+};
+
+// ============= Admin API =============
+export const adminAPI = {
+  login: async (adminKey: string): Promise<AdminLoginResponse> => {
+    const response = await apiClient.post<AdminLoginResponse>('/api/admin/login', {
+      admin_key: adminKey,
     });
     return response.data;
   },

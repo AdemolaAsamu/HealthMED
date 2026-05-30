@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { educationAPI } from '@/services/api';
+import { adminAPI, educationAPI } from '@/services/api';
 import { EducationCardCreate } from '@/types';
 
 type EducationCategory = NonNullable<EducationCardCreate['category']>;
@@ -8,7 +8,7 @@ type EducationCategory = NonNullable<EducationCardCreate['category']>;
 export default function Admin() {
   const [adminKey, setAdminKey] = useState(localStorage.getItem('adminKey') || '');
   const [isUnlocked, setIsUnlocked] = useState(
-    !import.meta.env.VITE_REQUIRE_ADMIN_KEY || localStorage.getItem('adminKey') !== null
+    localStorage.getItem('adminAuthenticated') === 'true'
   );
   const [newCard, setNewCard] = useState<EducationCardCreate>({
     title: '',
@@ -20,10 +20,39 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const unlockAdmin = (e: React.FormEvent) => {
+  const unlockAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('adminKey', adminKey);
-    setIsUnlocked(true);
+    if (!adminKey.trim()) {
+      setMessage({ type: 'error', text: 'Enter the admin key to continue' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await adminAPI.login(adminKey);
+      if (result.authenticated) {
+        localStorage.setItem('adminKey', adminKey);
+        localStorage.setItem('adminAuthenticated', 'true');
+        setIsUnlocked(true);
+        setMessage(null);
+      }
+    } catch (error) {
+      console.error('Admin login failed:', error);
+      localStorage.removeItem('adminKey');
+      localStorage.removeItem('adminAuthenticated');
+      setIsUnlocked(false);
+      setMessage({ type: 'error', text: 'Invalid admin login' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logoutAdmin = () => {
+    localStorage.removeItem('adminKey');
+    localStorage.removeItem('adminAuthenticated');
+    setAdminKey('');
+    setIsUnlocked(false);
+    setMessage(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,9 +93,21 @@ export default function Admin() {
         >
           <h1 className="text-4xl font-bold mb-8">Admin Panel</h1>
 
+          {message && (
+            <div
+              className={`p-4 rounded-lg mb-6 ${
+                message.type === 'success'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
           {!isUnlocked && (
             <div className="card mb-8">
-              <h2 className="text-2xl font-bold mb-6">Admin Access</h2>
+              <h2 className="text-2xl font-bold mb-6">Admin Login</h2>
               <form onSubmit={unlockAdmin} className="space-y-4">
                 <input
                   type="password"
@@ -75,8 +116,12 @@ export default function Admin() {
                   placeholder="Admin key"
                   className="input-field"
                 />
-                <button type="submit" className="btn-primary">
-                  Unlock Admin Tools
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-primary disabled:opacity-50"
+                >
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
             </div>
@@ -84,19 +129,16 @@ export default function Admin() {
 
           {isUnlocked && (
           <div className="card">
-            <h2 className="text-2xl font-bold mb-6">Add Education Content</h2>
-
-            {message && (
-              <div
-                className={`p-4 rounded-lg mb-6 ${
-                  message.type === 'success'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <h2 className="text-2xl font-bold">Add Education Content</h2>
+              <button
+                type="button"
+                onClick={logoutAdmin}
+                className="btn-secondary px-4 py-2"
               >
-                {message.text}
-              </div>
-            )}
+                Sign Out
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>

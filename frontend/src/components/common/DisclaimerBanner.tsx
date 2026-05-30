@@ -12,14 +12,14 @@ interface DisclaimerBannerProps {
 
 export default function DisclaimerBanner({ data, onDismiss }: DisclaimerBannerProps) {
   return (
-    <div className="bg-brand-primary text-white p-4 shadow-lg">
+    <div className="bg-brand-dark text-white p-4 shadow-lg">
       <div className="container-responsive">
         <div className="flex gap-4 items-start">
           <AlertTriangle className="flex-shrink-0 mt-1" size={24} />
           <div className="flex-1">
             <h3 className="font-bold text-lg mb-2">Important Disclaimer</h3>
-            <p className="text-sm mb-3">{data.primary_disclaimer}</p>
-            <p className="text-sm mb-3">{data.glucose_response}</p>
+            <p className="text-sm mb-3 text-white text-opacity-90">{data.primary_disclaimer}</p>
+            <p className="text-sm mb-3 text-white text-opacity-90">{data.glucose_response}</p>
 
             <div className="grid md:grid-cols-2 gap-4 text-sm mb-4">
               <div>

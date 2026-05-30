@@ -5,13 +5,14 @@ import { useState } from 'react';
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const isAdminAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
 
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/analyze', label: 'Analyze' },
     { href: '/compare', label: 'Compare' },
     { href: '/learn', label: 'Learn' },
-    { href: '/admin', label: 'Admin' },
+    ...(isAdminAuthenticated ? [{ href: '/admin', label: 'Admin' }] : []),
   ];
 
   const isActive = (href: string) => location.pathname === href;
@@ -22,7 +23,7 @@ export default function Header() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-10 h-10 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold">
-            🩸
+            IM
           </div>
           <div className="hidden sm:block">
             <div className="font-bold text-brand-dark text-lg">Inside My Meal</div>

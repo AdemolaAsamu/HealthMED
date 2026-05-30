@@ -6,24 +6,28 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+        display: ["Manrope", "Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+      },
       colors: {
         brand: {
-          primary: "#FF6B6B",
-          secondary: "#4ECDC4",
-          accent: "#FFE66D",
-          dark: "#2C3E50",
-          light: "#F7F9FC",
+          primary: "#C83E3E",
+          secondary: "#167C77",
+          accent: "#F4D35E",
+          dark: "#243447",
+          light: "#F6F8FA",
         },
         glucose: {
-          baseline: "#4ECDC4",
-          elevated: "#FFB84D",
-          high: "#FF6B6B",
-          low: "#95E1D3",
+          baseline: "#167C77",
+          elevated: "#B7791F",
+          high: "#C53030",
+          low: "#D6F5EF",
         },
         energy: {
-          storage: "#FFB84D",
-          action: "#4ECDC4",
-          risk: "#FF6B6B",
+          storage: "#B7791F",
+          action: "#167C77",
+          risk: "#C53030",
         }
       },
       animation: {

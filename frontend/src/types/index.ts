@@ -141,6 +141,10 @@ export interface DisclaimerResponse {
   limitations: string[];
 }
 
+export interface AdminLoginResponse {
+  authenticated: boolean;
+}
+
 // ============= UI State Types =============
 export interface AppState {
   currentUserSessionId: string;

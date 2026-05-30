@@ -59,8 +59,8 @@ function App() {
 
         <footer className="bg-brand-dark text-white py-12 mt-20">
           <div className="container-responsive text-center">
-            <p className="mb-4">
-              © 2024 Inside My Meal - Educational Platform
+            <p className="mb-4 text-white">
+              Inside My Meal - Educational Platform
             </p>
             <p className="text-sm text-gray-400 mb-6">
               This is an educational tool only. Not medical advice. Always consult healthcare providers.

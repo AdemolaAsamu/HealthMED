@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <div className="space-y-0">
       {/* Hero Section */}
-      <section className="section bg-gradient-to-br from-brand-primary via-red-500 to-pink-500 text-white">
+      <section className="section bg-brand-dark text-white">
         <div className="container-responsive grid md:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -40,7 +40,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-white">
               Your blood only carries <span className="text-brand-accent">1 teaspoon</span> of sugar
             </h1>
             <p className="text-xl mb-8 text-white text-opacity-90">
@@ -53,7 +53,7 @@ export default function Home() {
               <Link to="/analyze" className="btn-primary flex items-center gap-2">
                 Analyze a Meal <ArrowRight size={20} />
               </Link>
-              <Link to="/learn" className="btn-secondary">
+              <Link to="/learn" className="btn-on-dark">
                 Learn More
               </Link>
             </div>
@@ -178,9 +178,9 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="section bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
+      <section className="section bg-brand-secondary text-white">
         <div className="container-responsive text-center max-w-2xl mx-auto">
-          <h2 className="text-4xl font-bold mb-6">
+          <h2 className="text-4xl font-bold mb-6 text-white">
             Ready to Understand Your Metabolism?
           </h2>
           <p className="text-xl mb-8 text-white text-opacity-90">
@@ -195,8 +195,8 @@ export default function Home() {
       {/* Disclaimer Footer */}
       <section className="section bg-brand-dark text-white text-center">
         <div className="container-responsive max-w-3xl mx-auto">
-          <p className="text-lg font-semibold mb-4">
-            📋 Important Disclaimer
+          <p className="text-lg font-semibold mb-4 text-white">
+            Important Disclaimer
           </p>
           <p className="text-white text-opacity-80">
             Inside My Meal is an educational tool only and is NOT medical advice. Individual glucose responses vary significantly.

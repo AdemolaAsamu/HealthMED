@@ -104,7 +104,6 @@ cp .env.example .env.local
 Or create `.env.local` manually:
 ```
 VITE_API_BASE_URL=http://localhost:8000
-VITE_REQUIRE_ADMIN_KEY=true
 ```
 
 ### 4. Start development server
@@ -254,7 +253,6 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 ```
 VITE_API_BASE_URL=http://localhost:8000
-VITE_REQUIRE_ADMIN_KEY=true
 ```
 
 ## File Structure
