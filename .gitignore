@@ -18,4 +18,4 @@ ENV/
 *.db
 *.sqlite3
 .cache/
-
+*.tsbuildinfo
