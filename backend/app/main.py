@@ -5,7 +5,7 @@ Educational platform for understanding glucose and metabolic health
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.api import foods, meals, simulations, education
+from app.api import foods, meals, simulations, education, admin
 import os
 
 # Create database tables
@@ -32,6 +32,7 @@ app.include_router(foods.router)
 app.include_router(meals.router)
 app.include_router(simulations.router)
 app.include_router(education.router)
+app.include_router(admin.router)
 
 
 @app.get("/", tags=["root"])

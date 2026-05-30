@@ -2,9 +2,12 @@
 Database configuration and session management
 """
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+load_dotenv()
 
 # Get database URL from environment or use default SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")

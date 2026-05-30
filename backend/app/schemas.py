@@ -151,6 +151,15 @@ class EducationCardResponse(BaseModel):
         from_attributes = True
 
 
+# ============= Admin Schemas =============
+class AdminLoginRequest(BaseModel):
+    admin_key: str
+
+
+class AdminLoginResponse(BaseModel):
+    authenticated: bool
+
+
 # ============= Food Search Response =============
 class FoodSearchResult(BaseModel):
     foods: List[FoodResponse]
