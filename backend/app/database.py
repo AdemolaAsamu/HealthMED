@@ -11,6 +11,8 @@ load_dotenv()
 
 # Get database URL from environment or use default SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(
     DATABASE_URL,
