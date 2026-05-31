@@ -249,6 +249,11 @@ class GlucoseSimulator:
             storage_risk_score *= 0.8
 
         storage_risk_score = max(0, min(100, storage_risk_score))
+        fat_storage_estimate = GlucoseSimulator.estimate_fat_storage_equivalent(
+            meal_summary=meal_summary,
+            lifestyle=lifestyle,
+            storage_risk_score=storage_risk_score
+        )
 
         # ============= Generate Explanation =============
         explanation = GlucoseSimulator.generate_explanation(
@@ -256,7 +261,8 @@ class GlucoseSimulator:
             lifestyle=lifestyle,
             peak_mg_dl=peak_mg_dl,
             insulin_load_score=insulin_load_score,
-            storage_risk_score=storage_risk_score
+            storage_risk_score=storage_risk_score,
+            fat_storage_estimate=fat_storage_estimate
         )
 
         return {
@@ -265,9 +271,62 @@ class GlucoseSimulator:
             "peak_glucose_grams": round((peak_mg_dl * GlucoseSimulator.BLOOD_VOLUME_DL) / 1000, 2),
             "insulin_load_score": round(insulin_load_score, 1),
             "storage_risk_score": round(storage_risk_score, 1),
+            "fat_storage_estimate": fat_storage_estimate,
             "peak_time_minutes": peak_time_minutes,
             "glucose_curve": glucose_curve,
             "explanation": explanation
+        }
+
+    @staticmethod
+    def estimate_fat_storage_equivalent(
+        meal_summary: MealSummary,
+        lifestyle: LifestyleProfile,
+        storage_risk_score: float
+    ) -> Dict[str, Any]:
+        """
+        Estimate an educational fat-storage equivalent from possible surplus energy.
+        This is not a prediction of body-fat gain.
+        """
+        meal_energy_budget = 550
+        if lifestyle.is_sedentary:
+            meal_energy_budget -= 100
+        if lifestyle.regular_exercise:
+            meal_energy_budget += 100
+        if lifestyle.high_muscle_mass:
+            meal_energy_budget += 75
+
+        walk_minutes = min(max(lifestyle.post_meal_walk_minutes, 0), 60)
+        activity_offset_kcal = walk_minutes * 3.5
+
+        estimated_surplus = max(
+            0,
+            meal_summary.total_calories - meal_energy_budget - activity_offset_kcal
+        )
+
+        storage_efficiency = 0.55 + (storage_risk_score / 250)
+        if lifestyle.poor_sleep:
+            storage_efficiency += 0.05
+        if lifestyle.high_stress:
+            storage_efficiency += 0.03
+        if lifestyle.regular_exercise or lifestyle.post_meal_walk_minutes >= 10:
+            storage_efficiency -= 0.08
+
+        storage_efficiency = max(0.35, min(0.95, storage_efficiency))
+        low_efficiency = max(0.25, storage_efficiency - 0.15)
+        high_efficiency = min(0.95, storage_efficiency + 0.10)
+
+        return {
+            "estimated_energy_surplus_kcal": round(estimated_surplus, 1),
+            "potential_fat_storage_g_low": round((estimated_surplus * low_efficiency) / 9, 1),
+            "potential_fat_storage_g_high": round((estimated_surplus * high_efficiency) / 9, 1),
+            "storage_efficiency_percent": round(storage_efficiency * 100, 1),
+            "activity_offset_kcal": round(activity_offset_kcal, 1),
+            "assumption": (
+                "Educational estimate only: converts possible meal-level surplus energy "
+                "to a fat-storage equivalent using 9 kcal per gram of fat. It is not a "
+                "prediction of personal fat gain because daily energy balance, hormones, "
+                "medications, digestion, and activity vary widely."
+            )
         }
 
     @staticmethod
@@ -276,7 +335,8 @@ class GlucoseSimulator:
         lifestyle: LifestyleProfile,
         peak_mg_dl: float,
         insulin_load_score: float,
-        storage_risk_score: float
+        storage_risk_score: float,
+        fat_storage_estimate: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Generate educational explanation of glucose response"""
 
@@ -373,6 +433,13 @@ class GlucoseSimulator:
             )
 
         # Storage risk context
+        explanation["factors"].append(
+            "Potential fat-storage equivalent: "
+            f"{fat_storage_estimate['potential_fat_storage_g_low']:.1f}-"
+            f"{fat_storage_estimate['potential_fat_storage_g_high']:.1f}g "
+            "if this meal creates surplus energy"
+        )
+
         if storage_risk_score > 70:
             explanation["risks"].append(
                 "When glucose spikes are repeated regularly, the excess can accumulate as fat storage. "
@@ -395,6 +462,7 @@ class GlucoseSimulator:
         explanation["disclaimer"] = (
             "This is an educational simulation, not medical advice. "
             "Individual glucose responses vary by genetics, fitness level, stress, sleep, and medications. "
+            "Fat-storage values are energy-equivalent estimates, not predictions of body-fat gain. "
             "If diabetic or prediabetic, consult your doctor or use a continuous glucose monitor (CGM) for personal data."
         )
 

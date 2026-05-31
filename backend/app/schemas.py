@@ -114,6 +114,15 @@ class GlucoseTimepointResponse(BaseModel):
     glucose_percentage_remaining: float
 
 
+class FatStorageEstimate(BaseModel):
+    estimated_energy_surplus_kcal: float
+    potential_fat_storage_g_low: float
+    potential_fat_storage_g_high: float
+    storage_efficiency_percent: float
+    activity_offset_kcal: float
+    assumption: str
+
+
 class SimulationResponse(BaseModel):
     id: int
     meal_id: int
@@ -123,6 +132,7 @@ class SimulationResponse(BaseModel):
     insulin_load_score: float
     storage_risk_score: float
     glucose_curve: List[GlucoseTimepointResponse]
+    fat_storage_estimate: FatStorageEstimate
     explanation: Dict[str, Any]
     created_at: datetime
 

@@ -45,6 +45,7 @@ def create_simulation(
     )
     explanation = {
         **simulation_result["explanation"],
+        "fat_storage_estimate": simulation_result["fat_storage_estimate"],
         "glucose_curve": [
             point.model_dump() for point in simulation_result["glucose_curve"]
         ],
@@ -79,6 +80,9 @@ def create_simulation(
         insulin_load_score=saved_simulation.insulin_load_score,
         storage_risk_score=saved_simulation.storage_risk_score,
         glucose_curve=glucose_curve,
+        fat_storage_estimate=schemas.FatStorageEstimate.model_validate(
+            simulation_result["fat_storage_estimate"]
+        ),
         explanation=saved_simulation.explanation_json,
         created_at=saved_simulation.created_at
     )
@@ -108,6 +112,16 @@ def get_simulation(simulation_id: int, db: Session = Depends(get_db)):
         insulin_load_score=simulation.insulin_load_score,
         storage_risk_score=simulation.storage_risk_score,
         glucose_curve=glucose_curve,
+        fat_storage_estimate=schemas.FatStorageEstimate.model_validate(
+            explanation.get("fat_storage_estimate", {
+                "estimated_energy_surplus_kcal": 0,
+                "potential_fat_storage_g_low": 0,
+                "potential_fat_storage_g_high": 0,
+                "storage_efficiency_percent": 0,
+                "activity_offset_kcal": 0,
+                "assumption": "Estimate unavailable for older simulations."
+            })
+        ),
         explanation=explanation,
         created_at=simulation.created_at
     )
@@ -142,6 +156,23 @@ def get_meal_simulations(meal_id: int, db: Session = Depends(get_db)):
                 insulin_load_score=simulation.insulin_load_score,
                 storage_risk_score=simulation.storage_risk_score,
                 glucose_curve=glucose_curve,
+                fat_storage_estimate=schemas.FatStorageEstimate.model_validate(
+                    simulation.explanation_json.get("fat_storage_estimate", {
+                        "estimated_energy_surplus_kcal": 0,
+                        "potential_fat_storage_g_low": 0,
+                        "potential_fat_storage_g_high": 0,
+                        "storage_efficiency_percent": 0,
+                        "activity_offset_kcal": 0,
+                        "assumption": "Estimate unavailable for older simulations."
+                    }) if simulation.explanation_json else {
+                        "estimated_energy_surplus_kcal": 0,
+                        "potential_fat_storage_g_low": 0,
+                        "potential_fat_storage_g_high": 0,
+                        "storage_efficiency_percent": 0,
+                        "activity_offset_kcal": 0,
+                        "assumption": "Estimate unavailable for older simulations."
+                    }
+                ),
                 explanation=simulation.explanation_json,
                 created_at=simulation.created_at
             )
