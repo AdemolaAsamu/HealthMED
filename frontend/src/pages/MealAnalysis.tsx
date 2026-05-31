@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { foodAPI, mealAPI, simulationAPI } from '@/services/api';
 import { Food, LifestyleProfile } from '@/types';
 import { glucoseCalculations } from '@/services/calculations';
+import MetabolicAvatar from '@/components/meal/MetabolicAvatar';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export default function MealAnalysis() {
@@ -395,7 +396,7 @@ export default function MealAnalysis() {
           >
             <h2 className="text-3xl font-bold mb-8">Glucose Response Simulation</h2>
 
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="grid md:grid-cols-4 gap-6 mb-12">
               <div className="bg-brand-dark text-white p-8 rounded-lg">
                 <p className="text-sm font-semibold mb-2">Peak Glucose</p>
                 <p className="text-4xl font-bold">
@@ -431,10 +432,24 @@ export default function MealAnalysis() {
                   )}
                 </p>
               </div>
+
+              <div className="bg-white border border-gray-100 p-8 rounded-lg shadow-sm">
+                <p className="text-sm font-semibold mb-2 text-gray-600">Potential Fat Equivalent</p>
+                <p className="text-4xl font-bold text-brand-dark">
+                  {lastSimulation.fat_storage_estimate.potential_fat_storage_g_low.toFixed(1)}
+                  -
+                  {lastSimulation.fat_storage_estimate.potential_fat_storage_g_high.toFixed(1)}g
+                </p>
+                <p className="text-sm mt-2 text-gray-600">
+                  Estimated only if this meal creates surplus energy
+                </p>
+              </div>
             </div>
 
+            <MetabolicAvatar simulation={lastSimulation} />
+
             {/* Glucose Curve Chart */}
-            <div className="bg-brand-light p-8 rounded-xl">
+            <div className="bg-brand-light p-8 rounded-xl mt-12">
               <h3 className="text-lg font-bold mb-6">Blood Glucose Timeline</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={lastSimulation.glucose_curve}>

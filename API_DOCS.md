@@ -282,6 +282,14 @@ Run glucose simulation for a meal with lifestyle modifiers.
   "glucose_grams_peak": 7.25,
   "insulin_load_score": 45.2,
   "storage_risk_score": 35.8,
+  "fat_storage_estimate": {
+    "estimated_energy_surplus_kcal": 120,
+    "potential_fat_storage_g_low": 7.2,
+    "potential_fat_storage_g_high": 11.5,
+    "storage_efficiency_percent": 71.5,
+    "activity_offset_kcal": 35,
+    "assumption": "Educational estimate only..."
+  },
   "glucose_curve": [
     {
       "minutes": 0,

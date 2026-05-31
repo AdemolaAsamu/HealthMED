@@ -14,6 +14,9 @@
 
 **Important**: This is strictly an educational tool, NOT medical advice or diagnostic tool.
 
+Fat-storage values are energy-equivalent estimates only. They do not predict personal body-fat gain,
+and the avatar is an educational representation rather than a medical or legal digital twin.
+
 ## Features
 
 ### 1. Landing Page
@@ -31,6 +34,8 @@
 - Animated glucose load entering digestion
 - Estimated glucose rise and insulin response
 - Show glucose distribution: immediate energy, muscle glycogen, liver glycogen, fat storage
+- Educational potential fat-storage equivalent range when a meal may create surplus energy
+- Non-identifying metabolic avatar that visualizes response state without storing biometric identity
 
 ### 4. Lifestyle Modifiers
 - Sedentary vs. active

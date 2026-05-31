@@ -89,6 +89,15 @@ export interface GlucoseTimepoint {
   glucose_percentage_remaining: number;
 }
 
+export interface FatStorageEstimate {
+  estimated_energy_surplus_kcal: number;
+  potential_fat_storage_g_low: number;
+  potential_fat_storage_g_high: number;
+  storage_efficiency_percent: number;
+  activity_offset_kcal: number;
+  assumption: string;
+}
+
 export interface Simulation {
   id: number;
   meal_id: number;
@@ -98,6 +107,7 @@ export interface Simulation {
   insulin_load_score: number;
   storage_risk_score: number;
   glucose_curve: GlucoseTimepoint[];
+  fat_storage_estimate: FatStorageEstimate;
   explanation: Record<string, any>;
   created_at: string;
 }
