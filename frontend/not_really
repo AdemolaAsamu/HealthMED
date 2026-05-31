@@ -1,0 +1,10 @@
+// This is a placeholder file
+// It is not used
+export default function NotReally() {
+  return (
+    <div>
+      <h1>Not Really</h1>
+      <p>This page is not really used.</p>
+    </div>
+  );
+}
