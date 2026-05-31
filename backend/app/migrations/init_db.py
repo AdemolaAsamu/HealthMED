@@ -9,10 +9,14 @@ from app.schemas import FoodCreate, EducationCardCreate
 import app.crud as crud
 
 
+def safe_log(value):
+    return str(value).encode("ascii", errors="replace").decode("ascii")
+
+
 def init_db():
     """Initialize database with tables"""
     Base.metadata.create_all(bind=engine)
-    print("✓ Database tables created")
+    print("[ok] Database tables created")
 
 
 def seed_foods():
@@ -335,9 +339,9 @@ def seed_foods():
         existing = crud.get_food_by_source_id(db, food_data.source, food_data.source_food_id)
         if not existing:
             crud.create_food(db, food_data)
-            print(f"✓ Added food: {food_data.name}")
+            print(f"[ok] Added food: {safe_log(food_data.name)}")
         else:
-            print(f"✓ Food already exists: {food_data.name}")
+            print(f"[ok] Food already exists: {safe_log(food_data.name)}")
 
     db.close()
 
@@ -473,20 +477,20 @@ def seed_education_cards():
 
         if not existing:
             crud.create_education_card(db, card_data)
-            print(f"✓ Added education card: {card_data.title}")
+            print(f"[ok] Added education card: {safe_log(card_data.title)}")
         else:
-            print(f"✓ Card already exists: {card_data.title}")
+            print(f"[ok] Card already exists: {safe_log(card_data.title)}")
 
     db.close()
 
 
 def main():
     """Run all initialization steps"""
-    print("\n🚀 Starting database initialization...\n")
+    print("\nStarting database initialization...\n")
     init_db()
     seed_foods()
     seed_education_cards()
-    print("\n✅ Database initialization complete!\n")
+    print("\nDatabase initialization complete!\n")
 
 
 if __name__ == "__main__":

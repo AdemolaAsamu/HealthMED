@@ -4,8 +4,10 @@ Educational platform for understanding glucose and metabolic health
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import Base, engine
+from app.database import Base, SessionLocal, engine
 from app.api import foods, meals, simulations, education, admin
+from app import models
+from app.migrations.init_db import seed_education_cards, seed_foods
 import os
 
 # Create database tables
@@ -33,6 +35,25 @@ app.include_router(meals.router)
 app.include_router(simulations.router)
 app.include_router(education.router)
 app.include_router(admin.router)
+
+
+@app.on_event("startup")
+def seed_default_content_if_empty():
+    """
+    Render starts the app with uvicorn, not backend/run.py.
+    Seed default foods and education cards when a fresh production DB is empty.
+    """
+    db = SessionLocal()
+    try:
+        has_foods = db.query(models.Food.id).first() is not None
+        has_education = db.query(models.EducationCard.id).first() is not None
+    finally:
+        db.close()
+
+    if not has_foods:
+        seed_foods()
+    if not has_education:
+        seed_education_cards()
 
 
 @app.get("/", tags=["root"])
