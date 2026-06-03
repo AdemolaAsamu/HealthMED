@@ -15,6 +15,56 @@ class FoodAPIService:
     USDA_API_KEY = os.getenv("USDA_API_KEY", "DEMO_KEY")
     USDA_BASE_URL = "https://api.nal.usda.gov/fdc/v1"
     OPENFOODFACTS_BASE_URL = "https://world.openfoodfacts.org/api/v0"
+    USDA_NUTRIENT_IDS = {
+        "calories": {"1008", "208"},
+        "carbs_g": {"1005", "205"},
+        "sugars_g": {"2000", "269"},
+        "fiber_g": {"1079", "291"},
+        "protein_g": {"1003", "203"},
+        "fat_g": {"1004", "204"},
+    }
+
+    @staticmethod
+    def _as_float(value: Any) -> Optional[float]:
+        if value is None or value == "":
+            return None
+        try:
+            if isinstance(value, str):
+                value = value.replace(",", ".").strip()
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _first_number(source: Dict[str, Any], keys: List[str]) -> Optional[float]:
+        for key in keys:
+            value = FoodAPIService._as_float(source.get(key))
+            if value is not None:
+                return value
+        return None
+
+    @staticmethod
+    def _needs_nutrition_refresh(food: Any) -> bool:
+        return any(
+            getattr(food, field, None) is None
+            for field in ("calories", "carbs_g", "fiber_g", "protein_g", "fat_g")
+        )
+
+    @staticmethod
+    def _rehydrate_cached_food(db: Session, food: Any) -> Any:
+        if not food.raw_json or not FoodAPIService._needs_nutrition_refresh(food):
+            return food
+
+        if food.source == "usda":
+            parsed_food = FoodAPIService.extract_nutrition_from_usda(food.raw_json)
+        elif food.source == "openfoodfacts":
+            parsed_food = FoodAPIService.extract_nutrition_from_openfoodfacts(food.raw_json)
+        else:
+            parsed_food = None
+
+        if parsed_food:
+            return crud.update_food_nutrition(db, food, parsed_food)
+        return food
 
     @staticmethod
     async def search_usda_foods(query: str, limit: int = 20) -> List[Dict[str, Any]]:
@@ -78,22 +128,50 @@ class FoodAPIService:
 
             for nutrient in nutrients:
                 nutrient_name = nutrient.get("nutrientName", "").lower()
-                value = nutrient.get("value", 0)
+                nutrient_id = str(
+                    nutrient.get("nutrientId")
+                    or nutrient.get("nutrientNumber")
+                    or nutrient.get("number")
+                    or ""
+                )
+                unit_name = nutrient.get("unitName", "").lower()
+                value = FoodAPIService._as_float(nutrient.get("value"))
 
-                if "energy" in nutrient_name and ("kcal" in nutrient_name or nutrient.get("unitName", "").lower() == "kcal"):
+                if value is None:
+                    continue
+
+                if (
+                    nutrient_id in FoodAPIService.USDA_NUTRIENT_IDS["calories"]
+                    or ("energy" in nutrient_name and unit_name == "kcal")
+                ):
                     nutrients_dict["calories"] = value
-                elif "carbohydrate" in nutrient_name and "total" in nutrient_name and "sugar" not in nutrient_name:
+                elif (
+                    nutrient_id in FoodAPIService.USDA_NUTRIENT_IDS["carbs_g"]
+                    or ("carbohydrate" in nutrient_name and "sugar" not in nutrient_name)
+                ):
                     nutrients_dict["carbs_g"] = value
-                elif "sugars" in nutrient_name and "total" in nutrient_name:
+                elif (
+                    nutrient_id in FoodAPIService.USDA_NUTRIENT_IDS["sugars_g"]
+                    or "sugars" in nutrient_name
+                ):
                     nutrients_dict["sugars_g"] = value
-                elif "fiber" in nutrient_name and "total" in nutrient_name:
+                elif (
+                    nutrient_id in FoodAPIService.USDA_NUTRIENT_IDS["fiber_g"]
+                    or "fiber" in nutrient_name
+                ):
                     nutrients_dict["fiber_g"] = value
-                elif "protein" in nutrient_name:
+                elif (
+                    nutrient_id in FoodAPIService.USDA_NUTRIENT_IDS["protein_g"]
+                    or "protein" in nutrient_name
+                ):
                     nutrients_dict["protein_g"] = value
-                elif "fat" in nutrient_name and "total" in nutrient_name:
+                elif (
+                    nutrient_id in FoodAPIService.USDA_NUTRIENT_IDS["fat_g"]
+                    or ("fat" in nutrient_name and "total" in nutrient_name)
+                ):
                     nutrients_dict["fat_g"] = value
 
-            serving_size = food_data.get("servingSize", 100) or 100
+            serving_size = FoodAPIService._as_float(food_data.get("servingSize")) or 100
             serving_unit = food_data.get("servingSizeUnit", "g")
 
             if serving_unit.lower() != "g":
@@ -134,7 +212,7 @@ class FoodAPIService:
             if not nutrition:
                 nutrition = food_data.get("nutriments", {})
 
-            serving_size = food_data.get("serving_quantity", 100) or 100
+            serving_size = FoodAPIService._as_float(food_data.get("serving_quantity")) or 100
             serving_unit = food_data.get("serving_quantity_unit", "g")
 
             if serving_unit.lower() != "g":
@@ -146,12 +224,30 @@ class FoodAPIService:
                 name=name,
                 brand=brand,
                 serving_size_g=serving_size,
-                calories=nutrition.get("energy-kcal") or nutrition.get("energy_kcal"),
-                carbs_g=nutrition.get("carbohydrates") or nutrition.get("carbohydrates_100g"),
-                sugars_g=nutrition.get("sugars") or nutrition.get("sugars_100g"),
-                fiber_g=nutrition.get("fiber") or nutrition.get("fiber_100g"),
-                protein_g=nutrition.get("proteins") or nutrition.get("proteins_100g"),
-                fat_g=nutrition.get("fat") or nutrition.get("fat_100g"),
+                calories=FoodAPIService._first_number(
+                    nutrition,
+                    ["energy-kcal_100g", "energy-kcal", "energy_kcal_100g", "energy_kcal"],
+                ),
+                carbs_g=FoodAPIService._first_number(
+                    nutrition,
+                    ["carbohydrates_100g", "carbohydrates", "carbohydrates-serving"],
+                ),
+                sugars_g=FoodAPIService._first_number(
+                    nutrition,
+                    ["sugars_100g", "sugars", "sugars-serving"],
+                ),
+                fiber_g=FoodAPIService._first_number(
+                    nutrition,
+                    ["fiber_100g", "fiber", "fiber-serving"],
+                ),
+                protein_g=FoodAPIService._first_number(
+                    nutrition,
+                    ["proteins_100g", "proteins", "proteins-serving"],
+                ),
+                fat_g=FoodAPIService._first_number(
+                    nutrition,
+                    ["fat_100g", "fat", "fat-serving"],
+                ),
                 glycemic_category=None,
                 raw_json=food_data
             )
@@ -178,7 +274,9 @@ class FoodAPIService:
 
         # 1. Check local cache
         cached_foods = crud.search_foods(db, query, limit=limit)
-        results.extend([schemas.FoodResponse.model_validate(f) for f in cached_foods])
+        for cached_food in cached_foods:
+            repaired_food = FoodAPIService._rehydrate_cached_food(db, cached_food)
+            results.append(schemas.FoodResponse.model_validate(repaired_food))
 
         if len(results) >= limit:
             return results[:limit]
@@ -192,6 +290,8 @@ class FoodAPIService:
                 existing = crud.get_food_by_source_id(db, parsed_food.source, parsed_food.source_food_id)
                 if not existing:
                     existing = crud.create_food(db, parsed_food)
+                elif FoodAPIService._needs_nutrition_refresh(existing):
+                    existing = crud.update_food_nutrition(db, existing, parsed_food)
                 results.append(schemas.FoodResponse.model_validate(existing))
 
         if len(results) >= limit:
@@ -205,6 +305,8 @@ class FoodAPIService:
                 existing = crud.get_food_by_source_id(db, parsed_food.source, parsed_food.source_food_id)
                 if not existing:
                     existing = crud.create_food(db, parsed_food)
+                elif FoodAPIService._needs_nutrition_refresh(existing):
+                    existing = crud.update_food_nutrition(db, existing, parsed_food)
                 results.append(schemas.FoodResponse.model_validate(existing))
 
         return results[:limit]

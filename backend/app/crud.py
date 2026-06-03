@@ -48,6 +48,30 @@ def create_food(db: Session, food: schemas.FoodCreate):
     return db_food
 
 
+def update_food_nutrition(db: Session, db_food: models.Food, food: schemas.FoodCreate):
+    db_food.name = food.name or db_food.name
+    db_food.brand = food.brand or db_food.brand
+    db_food.serving_size_g = food.serving_size_g or db_food.serving_size_g
+    db_food.raw_json = food.raw_json or db_food.raw_json
+
+    for field in (
+        "calories",
+        "carbs_g",
+        "sugars_g",
+        "fiber_g",
+        "protein_g",
+        "fat_g",
+        "glycemic_category",
+    ):
+        value = getattr(food, field)
+        if value is not None:
+            setattr(db_food, field, value)
+
+    db.commit()
+    db.refresh(db_food)
+    return db_food
+
+
 # ============= Meal CRUD =============
 def create_meal(db: Session, meal: schemas.MealCreate):
     food_by_id = {}
@@ -75,9 +99,9 @@ def create_meal(db: Session, meal: schemas.MealCreate):
         # Calculate nutrition based on food and multipliers
         food = food_by_id[item.food_id]
         multiplier = item.quantity * item.serving_multiplier
-        db_item.carbs_g = food.carbs_g * multiplier if food.carbs_g else None
-        db_item.sugars_g = food.sugars_g * multiplier if food.sugars_g else None
-        db_item.calories = food.calories * multiplier if food.calories else None
+        db_item.carbs_g = food.carbs_g * multiplier if food.carbs_g is not None else None
+        db_item.sugars_g = food.sugars_g * multiplier if food.sugars_g is not None else None
+        db_item.calories = food.calories * multiplier if food.calories is not None else None
         db.add(db_item)
 
     db.commit()
@@ -118,9 +142,9 @@ def add_meal_item(db: Session, meal_id: int, item: schemas.MealItemCreate):
 
     # Calculate nutrition
     multiplier = item.quantity * item.serving_multiplier
-    db_item.carbs_g = food.carbs_g * multiplier if food.carbs_g else None
-    db_item.sugars_g = food.sugars_g * multiplier if food.sugars_g else None
-    db_item.calories = food.calories * multiplier if food.calories else None
+    db_item.carbs_g = food.carbs_g * multiplier if food.carbs_g is not None else None
+    db_item.sugars_g = food.sugars_g * multiplier if food.sugars_g is not None else None
+    db_item.calories = food.calories * multiplier if food.calories is not None else None
 
     db.add(db_item)
     db.commit()

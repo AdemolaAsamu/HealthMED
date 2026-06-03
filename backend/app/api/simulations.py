@@ -27,13 +27,14 @@ def create_simulation(
     # Calculate meal summary
     meal_items_data = []
     for item in meal.meal_items:
+        multiplier = item.quantity * item.serving_multiplier
         meal_items_data.append({
             "calories": item.calories or 0,
             "carbs_g": item.carbs_g or 0,
             "sugars_g": item.sugars_g or 0,
-            "fiber_g": item.food.fiber_g or 0 if item.food else 0,
-            "protein_g": item.food.protein_g or 0 if item.food else 0,
-            "fat_g": item.food.fat_g or 0 if item.food else 0,
+            "fiber_g": ((item.food.fiber_g or 0) * multiplier) if item.food else 0,
+            "protein_g": ((item.food.protein_g or 0) * multiplier) if item.food else 0,
+            "fat_g": ((item.food.fat_g or 0) * multiplier) if item.food else 0,
         })
 
     meal_summary = GlucoseSimulator.calculate_meal_summary(meal_items_data)
@@ -203,13 +204,14 @@ def compare_meals(
         # Calculate meal summary
         meal_items_data = []
         for item in meal.meal_items:
+            multiplier = item.quantity * item.serving_multiplier
             meal_items_data.append({
                 "calories": item.calories or 0,
                 "carbs_g": item.carbs_g or 0,
                 "sugars_g": item.sugars_g or 0,
-                "fiber_g": item.food.fiber_g or 0 if item.food else 0,
-                "protein_g": item.food.protein_g or 0 if item.food else 0,
-                "fat_g": item.food.fat_g or 0 if item.food else 0,
+                "fiber_g": ((item.food.fiber_g or 0) * multiplier) if item.food else 0,
+                "protein_g": ((item.food.protein_g or 0) * multiplier) if item.food else 0,
+                "fat_g": ((item.food.fat_g or 0) * multiplier) if item.food else 0,
             })
 
         meal_summary = GlucoseSimulator.calculate_meal_summary(meal_items_data)
